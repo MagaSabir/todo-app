@@ -12,11 +12,18 @@ import {
 import { TasksService } from './tasks.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { TaskResponseDto } from './dto/task-response.dto';
+import { TaskQueryDto } from './dto/task-query.dto';
+
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { CurrentUser as CurrentUserInterface } from '../auth/interfaces/current-user.interface';
-import { TaskQueryDto } from './dto/task-query.dto';
 
 @ApiTags('tasks')
 @ApiBearerAuth()
@@ -27,15 +34,20 @@ export class TasksController {
 
   @Post()
   @ApiOperation({ summary: 'Создать новую задачу' })
+  @ApiResponse({ status: 201, type: TaskResponseDto })
   create(
     @Body() createTaskDto: CreateTaskDto,
     @CurrentUser() user: CurrentUserInterface,
-  ) {
+  ): Promise<TaskResponseDto> {
     return this.tasksService.create(createTaskDto, user);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Получить все задачи текущего пользователя' })
+  @ApiOperation({
+    summary:
+      'Получить все задачи текущего пользователя с фильтрами и пагинацией',
+  })
+  @ApiResponse({ status: 200, type: [TaskResponseDto] })
   findAll(
     @CurrentUser() user: CurrentUserInterface,
     @Query() query: TaskQueryDto,
@@ -45,22 +57,28 @@ export class TasksController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Получить одну задачу по ID' })
-  findOne(@Param('id') id: string, @CurrentUser() user: CurrentUserInterface) {
+  @ApiResponse({ status: 200, type: TaskResponseDto })
+  findOne(
+    @Param('id') id: string,
+    @CurrentUser() user: CurrentUserInterface,
+  ): Promise<TaskResponseDto> {
     return this.tasksService.findOne(id, user);
   }
 
   @Patch(':id')
   @ApiOperation({ summary: 'Обновить задачу' })
+  @ApiResponse({ status: 200, type: TaskResponseDto })
   update(
     @Param('id') id: string,
     @Body() updateTaskDto: UpdateTaskDto,
     @CurrentUser() user: CurrentUserInterface,
-  ) {
+  ): Promise<TaskResponseDto> {
     return this.tasksService.update(id, updateTaskDto, user);
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: 'Удалить задачу' })
+  @ApiOperation({ summary: 'Удалить задачу (soft delete)' })
+  @ApiResponse({ status: 200, description: 'Задача успешно удалена' })
   remove(@Param('id') id: string, @CurrentUser() user: CurrentUserInterface) {
     return this.tasksService.remove(id, user);
   }

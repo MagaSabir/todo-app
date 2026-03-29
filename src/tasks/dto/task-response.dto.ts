@@ -9,16 +9,16 @@ export class TaskResponseDto {
   title: string;
 
   @ApiProperty({ required: false })
-  description?: string;
+  description?: string | null;
 
-  @ApiProperty({ enum: ['TODO', 'IN_PROGRESS', 'DONE'] })
+  @ApiProperty({ enum: TaskStatus })
   status: TaskStatus;
 
-  @ApiProperty({ enum: ['LOW', 'MEDIUM', 'HIGH'] })
+  @ApiProperty({ enum: TaskPriority })
   priority: TaskPriority;
 
   @ApiProperty({ required: false })
-  dueDate?: Date;
+  dueDate?: Date | null;
 
   @ApiProperty()
   userId: string;
@@ -28,4 +28,12 @@ export class TaskResponseDto {
 
   @ApiProperty()
   updatedAt: Date;
+
+  // Дополнительные поля от include user
+  @ApiProperty({ required: false })
+  user?: {
+    id: string;
+    email: string;
+    name: string | null;
+  };
 }
