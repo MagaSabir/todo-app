@@ -69,4 +69,9 @@ export class AuthService {
     await this.usersService.updateRefreshToken(user.id, newRefreshToken);
     return { accessToken: newAccessToken };
   }
+
+  async logout(userId: string) {
+    await this.usersService.updateRefreshToken(userId, null);
+    return { message: 'Успешный выход из системы' };
+  }
 }

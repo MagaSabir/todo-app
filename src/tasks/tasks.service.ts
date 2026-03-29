@@ -46,7 +46,10 @@ export class TasksService {
 
     const skip = (page - 1) * limit;
 
-    const where: Prisma.TaskWhereInput = { userId: user.id };
+    const where: Prisma.TaskWhereInput = {
+      userId: user.id,
+      deletedAt: null,
+    };
 
     if (status) where.status = status as TaskStatus;
     if (priority) where.priority = priority as TaskPriority;
@@ -81,6 +84,15 @@ export class TasksService {
     };
   }
 
+  async remove(id: string, user: CurrentUser) {
+    await this.findOne(id, user);
+
+    return this.prisma.task.update({
+      where: { id },
+      data: { deletedAt: new Date() },
+    });
+  }
+
   async findOne(id: string, user: CurrentUser) {
     const task = await this.prisma.task.findUnique({
       where: { id },
@@ -113,14 +125,6 @@ export class TasksService {
           select: { id: true, email: true, name: true },
         },
       },
-    });
-  }
-
-  async remove(id: string, user: CurrentUser) {
-    await this.findOne(id, user);
-
-    return this.prisma.task.delete({
-      where: { id },
     });
   }
 }

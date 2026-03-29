@@ -37,4 +37,11 @@ export class AuthController {
   getProfile(@CurrentUser() user: CurrentUserInterface) {
     return user;
   }
+
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Post('logout')
+  async logout(@CurrentUser() user: CurrentUserInterface) {
+    return this.authService.logout(user.id);
+  }
 }
