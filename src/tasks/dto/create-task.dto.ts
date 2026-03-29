@@ -8,27 +8,27 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTaskDto {
-  @ApiProperty()
+  @ApiProperty({ example: 'Купить молоко' })
   @IsString()
   @IsNotEmpty()
   title: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ example: 'Купить 2 литра молока', required: false })
   @IsString()
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ enum: ['TODO', 'IN_PROGRESS', 'DONE'] })
+  @ApiProperty({ enum: ['TODO', 'IN_PROGRESS', 'DONE'], default: 'TODO' })
   @IsEnum(['TODO', 'IN_PROGRESS', 'DONE'])
   @IsOptional()
-  status?: 'TODO' | 'IN_PROGRESS' | 'DONE';
+  status?: 'TODO' | 'IN_PROGRESS' | 'DONE' = 'TODO';
 
-  @ApiProperty({ enum: ['LOW', 'MEDIUM', 'HIGH'] })
+  @ApiProperty({ enum: ['LOW', 'MEDIUM', 'HIGH'], default: 'MEDIUM' })
   @IsEnum(['LOW', 'MEDIUM', 'HIGH'])
   @IsOptional()
-  priority?: 'LOW' | 'MEDIUM' | 'HIGH';
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ example: '2026-04-15', required: false })
   @IsDateString()
   @IsOptional()
   dueDate?: string;
