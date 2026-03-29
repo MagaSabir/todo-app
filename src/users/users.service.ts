@@ -38,4 +38,23 @@ export class UsersService {
       },
     });
   }
+
+  async findByIdWithRefreshToken(id: string) {
+    return this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        refreshToken: true,
+      },
+    });
+  }
+
+  async updateRefreshToken(userId: string, refreshToken: string | null) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { refreshToken },
+    });
+  }
 }

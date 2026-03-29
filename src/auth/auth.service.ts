@@ -38,6 +38,8 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
+    await this.usersService.updateRefreshToken(user.id, refreshToken);
+
     return {
       accessToken,
       refreshToken,
@@ -51,15 +53,20 @@ export class AuthService {
 
   async refreshToken(refreshToken: string) {
     const payload = this.jwtService.verify(refreshToken);
-    const user = await this.usersService.findById(payload.id);
+    const user = await this.usersService.findByIdWithRefreshToken(payload.sub);
 
     if (!user || user.refreshToken !== refreshToken) {
       throw new UnauthorizedException('Недействительный refresh token');
     }
-    const newAccessToken = this.jwtService.sign({
-      sub: user.id,
-      email: user.email,
+    const newPayload = { sub: user.id, email: user.email };
+
+    const newAccessToken = this.jwtService.sign(newPayload, {
+      expiresIn: '15m',
     });
+    const newRefreshToken = this.jwtService.sign(newPayload, {
+      expiresIn: '7d',
+    });
+    await this.usersService.updateRefreshToken(user.id, newRefreshToken);
     return { accessToken: newAccessToken };
   }
 }
