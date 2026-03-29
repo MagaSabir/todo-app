@@ -1,12 +1,67 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from '../app.service';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
+import { TasksService } from './tasks.service';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { CurrentUser as CurrentUserInterface } from '../auth/interfaces/current-user.interface';
+import { TaskQueryDto } from './dto/task-query.dto';
 
-@Controller()
+@ApiTags('tasks')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+@Controller('tasks')
 export class TasksController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly tasksService: TasksService) {}
+
+  @Post()
+  @ApiOperation({ summary: 'Создать новую задачу' })
+  create(
+    @Body() createTaskDto: CreateTaskDto,
+    @CurrentUser() user: CurrentUserInterface,
+  ) {
+    return this.tasksService.create(createTaskDto, user);
+  }
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
+  @ApiOperation({ summary: 'Получить все задачи текущего пользователя' })
+  findAll(
+    @CurrentUser() user: CurrentUserInterface,
+    @Query() query: TaskQueryDto,
+  ) {
+    return this.tasksService.findAll(user, query);
+  }
+
+  @Get(':id')
+  @ApiOperation({ summary: 'Получить одну задачу по ID' })
+  findOne(@Param('id') id: string, @CurrentUser() user: CurrentUserInterface) {
+    return this.tasksService.findOne(id, user);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Обновить задачу' })
+  update(
+    @Param('id') id: string,
+    @Body() updateTaskDto: UpdateTaskDto,
+    @CurrentUser() user: CurrentUserInterface,
+  ) {
+    return this.tasksService.update(id, updateTaskDto, user);
+  }
+
+  @Delete(':id')
+  @ApiOperation({ summary: 'Удалить задачу' })
+  remove(@Param('id') id: string, @CurrentUser() user: CurrentUserInterface) {
+    return this.tasksService.remove(id, user);
   }
 }

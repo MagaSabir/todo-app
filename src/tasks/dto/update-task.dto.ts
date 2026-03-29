@@ -6,6 +6,7 @@ import {
   IsDateString,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 export class UpdateTaskDto {
   @ApiProperty({ example: 'Купить молоко' })
@@ -28,8 +29,14 @@ export class UpdateTaskDto {
   @IsOptional()
   priority?: 'LOW' | 'MEDIUM' | 'HIGH' = 'MEDIUM';
 
-  @ApiProperty({ example: '2026-04-15', required: false })
-  @IsDateString()
+  @ApiProperty({
+    example: '2026-04-15',
+    description: 'Дата дедлайна в формате YYYY-MM-DD',
+    required: false,
+  })
   @IsOptional()
-  dueDate?: string;
+  @Transform(({ value }) => (value ? new Date(value) : undefined), {
+    toClassOnly: true,
+  })
+  dueDate?: Date;
 }
