@@ -35,7 +35,6 @@ export class UsersService {
         id: true,
         email: true,
         name: true,
-        refreshToken: true,
       },
     });
   }

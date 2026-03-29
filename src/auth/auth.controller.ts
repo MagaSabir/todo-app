@@ -1,17 +1,11 @@
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import {
-  Body,
-  Controller,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { CurrentUser } from './decorators/current-user.decorator';
+import type { CurrentUser as CurrentUserInterface } from './interfaces/current-user.interface';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -19,9 +13,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
-  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Регистрация нового пользователя' })
-  @ApiResponse({ status: 201, description: 'Пользователь успешно создан' })
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
@@ -39,9 +31,10 @@ export class AuthController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Post('me')
   @ApiOperation({ summary: 'Получить информацию о текущем пользователе' })
-  async getProfile(@Req() req: any) {
-    return req.user;
+  getProfile(@CurrentUser() user: CurrentUserInterface) {
+    return user;
   }
 }
