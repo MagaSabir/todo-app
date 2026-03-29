@@ -1,14 +1,26 @@
 import { Module } from '@nestjs/common';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { AuthController } from './auth/auth.controller';
+import { AuthModule } from './auth/auth.module';
 import { TasksModule } from './tasks/tasks.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, TasksModule],
-  controllers: [AuthController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: ['.env', '.env.local'],
+      validate: (env: Record<string, any>) => {
+        if (!env.JWT_SECRET) {
+          throw new Error('JWT_SECRET is required');
+        }
+        return env;
+      },
+    }),
+    PrismaModule,
+    UsersModule,
+    AuthModule,
+    TasksModule,
+  ],
 })
 export class AppModule {}
