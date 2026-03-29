@@ -1,32 +1,15 @@
 version: '3.8'
 
 services:
-  app:
+  todo-app:
     build: .
+    container_name: todo-app
     ports:
       - "3000:3000"
     environment:
       - NODE_ENV=production
-      - JWT_SECRET=${JWT_SECRET}
-      - DATABASE_URL=${DATABASE_URL}
+      - JWT_SECRET=${JWT_SECRET:-super-secret-key-change-in-production}
+      - DATABASE_URL=file:/app/data/dev.db
     volumes:
-      - ./prisma:/app/prisma
       - ./data:/app/data
-    depends_on:
-      - db
-
-  # Если хочешь использовать PostgreSQL вместо SQLite (рекомендую для продакшена)
-  db:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      POSTGRES_DB: todoapp
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
+    restart: unless-stopped
